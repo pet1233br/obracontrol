@@ -3,22 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movimentacao;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 
 class MovimentacaoController extends Controller
 {
-public function index()
+   public function index(Request $request)
 {
-    // 1. Pega as movimentações com os relacionamentos (Eager Loading)
-// Mude de latest() para oldest() só para testar:
-$movimentacoes = \App\Models\Movimentacao::with(['produto', 'user'])
-                    ->latest() // Os primeiros que foram criados na história
-                    ->paginate(100); // Pega muita coisa de uma vez
+    // Carregamos as relações e já pedimos a soma da coluna 'quantidade' na tabela pivô
+    $query = Movimentacao::with(['produto.categoria', 'user'])
+        ->with(['produto' => function($q) {
+            $q->withSum('empresas as estoque_real', 'produto_empresa.quantidade');
+        }]);
 
-    // 2. BUSCA AS CATEGORIAS (O que estava faltando!)
-    $categorias = \App\Models\Categoria::all();
+    // Filtro por Categoria
+    if ($request->filled('categoria_id')) {
+        $query->whereHas('produto', function($q) use ($request) {
+            $q->where('categoria_id', $request->categoria_id);
+        });
+    }
 
-    // 3. Envia AMBAS para a view
+    // Filtros de Data
+    if ($request->filled('data_inicio')) {
+        $query->whereDate('created_at', '>=', $request->data_inicio);
+    }
+    if ($request->filled('data_fim')) {
+        $query->whereDate('created_at', '<=', $request->data_fim);
+    }
+
+    $movimentacoes = $query->latest()->paginate(10);
+    $categorias = Categoria::all();
+
     return view('movimentacoes.index', compact('movimentacoes', 'categorias'));
 }
 }

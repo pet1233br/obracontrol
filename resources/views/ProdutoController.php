@@ -7,46 +7,42 @@ use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
 {
-    public function index()
-    {
-        $produtos = Produto::paginate(10);
-        return view('produtos.index', compact('produtos'));
-    }
+  public function index()
+{
+    $produtos = Produto::with('empresas', 'categoria')->get();
+
+    return view('produtos.index', compact('produtos'));
+}
 
     public function create()
     {
         return view('produtos.create');
     }
 
-public function store(Request $request)
+public function store(Request $request) 
 {
-    // Debug obrigatório para ver o que está chegando
-    // Comente depois que funcionar
-    // dd($request->all());  // ← descomente isso para ver TODO o request
-
     $produto = new Produto();
     $produto->nome       = $request->nome;
     $produto->descricao  = $request->descricao;
     $produto->quantidade = $request->quantidade;
 
-    // TRATAMENTO FORÇADO DO PREÇO - isso TEM que resolver
+    // --- SEU TRATAMENTO FORÇADO ---
     $precoInput = trim($request->preco ?? '0');
-    $precoInput = str_replace(['R$', 'r$', '$', ' '], '', $precoInput);     // remove símbolos e espaços
-    $precoInput = str_replace('.', '', $precoInput);                        // remove ponto de milhar (Brasil)
-    $precoInput = str_replace(',', '.', $precoInput);                       // vírgula vira ponto decimal
-    $produto->preco = (float) $precoInput;                                  // força float
+    $precoInput = str_replace(['R$', 'r$', '$', ' '], '', $precoInput);
+    $precoInput = str_replace('.', '', $precoInput);
+    $precoInput = str_replace(',', '.', $precoInput);
+    $produto->preco = (float) $precoInput; 
 
-    // Debug do preço (descomente para testar)
-    // dd('Preço original:', $request->preco, 'Preço convertido:', $produto->preco);
-
-    if ($request->hasFile('imagem') && $request->file('imagem')->isValid()) {
+    // --- SALVAMENTO DA IMAGEM ---
+    if ($request->hasFile('imagem')) {
+        // Salva e guarda o caminho exato
         $path = $request->file('imagem')->store('produtos', 'public');
         $produto->imagem = $path;
     }
 
-    $produto->save();
+    $produto->save(); // Isso envia pro banco
 
-    return redirect('/produtos')->with('success', 'Produto cadastrado!');
+    return redirect('/produtos');
 }
     private function formatarPreco($valor)
     {
