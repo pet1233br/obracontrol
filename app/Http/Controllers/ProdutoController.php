@@ -92,19 +92,18 @@ class ProdutoController extends Controller
     // 3. SALVAR NOVO PRODUTO
     public function store(Request $request)
     {
-        // 1. Validação básica
+        // 1. VALIDAÇÃO AJUSTADA (Preço removido daqui)
         $request->validate([
             'nome' => 'required',
             'categoria_id' => 'required',
             'quantidade' => 'required|integer',
             'empresa_id' => 'required',
-            'preco' => 'required', // Garante que o preço venha do formulário
+            // 'preco' => 'required', <-- REMOVIDO
         ]);
 
-        // 2. TRATAMENTO DO PREÇO (Converte "1.500,00" para 1500.00)
-        $precoRaw = $request->preco;
-        $precoLimpo = str_replace('.', '', $precoRaw);
-        $precoLimpo = str_replace(',', '.', $precoLimpo);
+        // 2. TRATAMENTO DO PREÇO REMOVIDO (Não vem do formulário mais)
+        // Definimos como 0 por padrão para o cadastro inicial
+        $precoPadrao = 0;
 
         // 3. TRATAMENTO DA IMAGEM
         $caminhoImagem = null;
@@ -112,22 +111,21 @@ class ProdutoController extends Controller
             $caminhoImagem = $request->file('imagem')->store('produtos', 'public');
         }
 
-        // 4. CRIAÇÃO DO PRODUTO (Aqui estava o erro: antes estava 'preco' => 0)
-        // No passo 4 do seu método store():
+        // 4. CRIAÇÃO DO PRODUTO (Preço fixado em 0)
         $produto = Produto::create([
             'nome'           => $request->nome,
             'categoria_id'   => $request->categoria_id,
             'quantidade'     => $request->quantidade,
             'descricao'      => $request->descricao,
-            'preco'          => (float) $precoLimpo,
+            'preco'          => $precoPadrao, // Entra como 0
             'imagem'         => $caminhoImagem,
-            'estoque_minimo' => $request->estoque_minimo ?? 0, // ADICIONE ESTA LINHA
+            'estoque_minimo' => $request->estoque_minimo ?? 0,
         ]);
 
-        // 5. VÍNCULO COM A EMPRESA (Tabela Pivô)
+        // 5. VÍNCULO COM A EMPRESA (Preço de compra também entra como 0)
         $produto->empresas()->attach($request->empresa_id, [
             'quantidade'   => $request->quantidade,
-            'preco_compra' => (float) $precoLimpo,
+            'preco_custo'  => $precoPadrao, // Verifique se no seu banco é preco_custo ou preco_compra
         ]);
 
         // 6. REGISTRO NO HISTÓRICO
@@ -136,10 +134,10 @@ class ProdutoController extends Controller
             'user_id'    => auth()->id() ?? 1,
             'tipo'       => 'entrada',
             'quantidade' => $request->quantidade,
-            'observacao' => 'Cadastro inicial do produto',
+            'observacao' => 'Cadastro inicial (preço pendente de edição)',
         ]);
 
-        return redirect()->route('produtos.index')->with('success', 'Produto cadastrado com sucesso!');
+        return redirect()->route('produtos.index')->with('success', 'Produto cadastrado! Agora você pode editar o preço na listagem.');
     }
 
     // 4. TELA DE EDIÇÃO

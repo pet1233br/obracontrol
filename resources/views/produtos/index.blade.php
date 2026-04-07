@@ -12,7 +12,7 @@
         --dash-red: #dc3545;
         --dash-bg: #0f1021;
         --card-bg: rgba(255, 255, 255, 0.05);
-        --text-input: #e0e0e0;
+
     }
 
 
@@ -36,7 +36,7 @@
 
     .product-card {
         background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(10px);
+
         border-radius: 20px;
         transition: all 0.3s ease;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -136,7 +136,7 @@
 
     /* 5. MODAL BLUR PREMIUM */
     .modal-backdrop.show {
-        backdrop-filter: blur(15px) !important;
+
         background-color: rgba(0, 0, 0, 0.8) !important;
     }
 </style>
@@ -242,8 +242,7 @@
 
 
                 <div class="text-warning fw-bold">
-
-                    R$ {{ number_format((float)$p->preco, 2, ',', '.') }}
+                    {{ 'R$ ' . number_format($p->estoque_total * $p->preco_medio, 2, ',', '.') }}
                 </div>
 
                 <div class="text-center d-flex justify-content-center gap-2">

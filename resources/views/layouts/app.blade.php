@@ -177,81 +177,61 @@
             color: rgba(255, 255, 255, 0.4) !important;
         }
 
-        .ts-wrapper.tom-select {
-            width: 100% !important;
-            display: block !important;
-        }
-
-        .ts-control {
-            width: 100% !important;
-        }
-
-
-
-
-        /* dropdown padronizado */
-        /* 1. O CAMPO FECHADO (Respeita o col-md-X do Bootstrap) */
-        .ts-wrapper.tom-select {
-            width: 100% !important;
-            /* Faz o dropdown ocupar toda a coluna do Bootstrap */
-            background: transparent !important;
-        }
-
-        .ts-wrapper.tom-select .ts-control {
+        .ts-wrapper.single .ts-control {
             background-color: #24242448 !important;
-            /* Seu Marine Blue transparente */
-
-            border-radius: 12px !important;
-            padding: 12px 15px !important;
-            color: #ffffff !important;
-            min-height: 50px !important;
-            display: flex !important;
-            align-items: center !important;
-            transition: 0.3s ease !important;
-        }
-
-        .form-control:focus {
-            color: #fff !important;
-        }
-
-        /* 2. A LISTA DE OPÇÕES (Dropdown aberto) */
-        .ts-wrapper.tom-select .ts-dropdown {
-            background-color: #1a1c3d !important;
-            /* Azul escuro sólido para não vazar fundo */
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             border-radius: 12px !important;
+            padding: 12px 45px 12px 16px !important;
+            min-height: 50px !important;
+            color: #fff !important;
+            font-size: 0.95rem;
+        }
+
+        .ts-wrapper.single.focus .ts-control {
+            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.4) !important;
+            border-color: rgba(255, 193, 7, 0.3) !important;
+        }
+
+        /* Seta customizada */
+        .ts-wrapper.single .ts-control::after {
+            content: "\f107";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .ts-wrapper.single.dropdown-active .ts-control::after {
+            transform: translateY(-50%) rotate(180deg);
+            color: #ffc107;
+        }
+
+        /* Dropdown - estilo da segunda imagem */
+        .ts-dropdown {
+            background-color: #0f1329 !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 12px !important;
             margin-top: 8px !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+            padding: 8px 0 !important;
         }
 
-        .ts-wrapper.tom-select .ts-dropdown .option {
-            padding: 12px 15px !important;
-            color: rgba(255, 255, 255, 0.8) !important;
+        .ts-dropdown .option {
+            padding: 13px 18px !important;
+            color: #ddd !important;
+            font-size: 0.95rem;
         }
 
-        /* 3. HOVER / SELEÇÃO (Seu Amarelo Construção) */
-        .ts-wrapper.tom-select .ts-dropdown .active {
-            background-color: var(--yellow) !important;
+        .ts-dropdown .option:hover,
+        .ts-dropdown .active {
+            background-color: #ffc107 !important;
             color: #000000 !important;
             font-weight: 700 !important;
         }
-
-        /* Garante que o dropdown tenha altura suficiente para todas as opções */
-        .ts-dropdown.tom-select .ts-dropdown-content {
-            max-height: 300px !important;
-            overflow-y: auto !important;
-            padding: 5px 0 !important;
-        }
-
-        /* Garante que a opção "TODAS" (vazia) não seja escondida pelo CSS */
-        .ts-dropdown .option[data-value=""],
-        .ts-dropdown .option:first-child {
-            display: block !important;
-            min-height: 40px !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-            /* Divisor sutil */
-        }
-
 
 
 
@@ -496,7 +476,7 @@
 
         /* 3. Dropdown (Fundo Preto sem vazamento) */
         .ts-dropdown {
-            background-color: #111 !important;
+            background: #151846 !important;
             border: 1px solid #333 !important;
             border-radius: 10px !important;
             margin-top: 5px !important;
@@ -606,20 +586,24 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    @stack('scripts')
 
-    {{-- Isso é vital para que scripts de páginas específicas funcionem --}}
-    @stack('scripts')
-    {{-- 1. ADICIONE ESSA LINHA AQUI EMBAIXO --}}
-    @stack('scripts')
+    @yield('scripts')
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. Seu código do TomSelect (mantenha ele aqui)
+            // 1. Inicialização Global do TomSelect (para campos com a classe .tom-select)
             document.querySelectorAll('.tom-select').forEach((el) => {
-                // ... config do tomselect ...
+                if (!el.tomselect) { // Evita inicializar duas vezes
+                    new TomSelect(el, {
+                        create: false,
+                        allowEmptyOption: true,
+                        placeholder: "SELECIONE...",
+                    });
+                }
             });
 
-            // 2. O NOVO CÓDIGO DOS MODAIS (Adicione aqui)
+            // 2. Correção de Z-Index dos Modais (Move para o final do body)
             const modais = document.querySelectorAll('.modal');
             modais.forEach(modal => {
                 document.body.appendChild(modal);
@@ -627,3 +611,5 @@
         });
     </script>
 </body>
+
+</html>

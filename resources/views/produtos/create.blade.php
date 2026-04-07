@@ -31,8 +31,8 @@
 
                 <div class="col-md-5">
                     <label class="form-label text-secondary text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Categoria</label>
-                    <select name="categoria_id" class="form-select bg-dark border-secondary text-white shadow-none @error('categoria_id') is-invalid @enderror"
-                        style="border-radius: 10px; height: 50px; cursor: pointer;">
+                    {{-- ADICIONADO: classe tom-select --}}
+                    <select name="categoria_id" class="tom-select form-select shadow-none @error('categoria_id') is-invalid @enderror">
                         <option value="">SELECIONE...</option>
                         @foreach($categorias as $categoria)
                         <option value="{{ $categoria->id }}">{{ strtoupper($categoria->nome) }}</option>
@@ -40,22 +40,16 @@
                     </select>
                 </div>
 
-                {{-- COLE ISTO NO LUGAR --}}
-                <div class="col-md-4">
-                    <label class="form-label text-secondary text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Preço de Custo (R$)</label>
-                    <input type="text" name="preco" id="preco_mask" class="form-control bg-dark border-secondary text-white ps-3 shadow-none"
-                        placeholder="0,00" value="{{ old('preco') }}" required
-                        style="border-radius: 10px; height: 50px;">
-                </div>
 
-                <div class="col-md-4">
+
+                <div class="col-md-6">
                     <label class="form-label text-secondary text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Qtd. em Estoque</label>
                     <input type="number" name="quantidade" class="form-control bg-dark border-secondary text-white ps-3 shadow-none"
                         placeholder="0" value="{{ old('quantidade') }}" required
                         style="border-radius: 10px; height: 50px;">
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label text-secondary text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Avisar quando chegar em:</label>
                     <input type="number" name="estoque_minimo" class="form-control bg-dark border-secondary text-white ps-3 shadow-none"
                         placeholder="Ex: 5" value="{{ old('estoque_minimo', 5) }}" required
@@ -101,23 +95,70 @@
                             </div>
                         </div>
                     </div>
-
-
-                    @if ($errors->any())
-                    <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px; background: rgba(220, 53, 69, 0.1); color: #ff6b6b;">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                            <li><i class="fas fa-exclamation-triangle me-2"></i> {{ $error }}</li>
-                            @endforeach
-                        </ul>
+                    <div class="col-12 mt-5">
+                        <button type="submit" class="btn btn-custom btn-empresa w-100 py-3 shadow-lg">
+                            <i class="fas fa-check-circle me-2"></i> SALVAR PRODUTO NO ESTOQUE
+                        </button>
                     </div>
-                    @endif
+
             </form>
         </div>
+
+        @if ($errors->any())
+        <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px; background: rgba(220, 53, 69, 0.1); color: #ff6b6b;">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                <li><i class="fas fa-exclamation-triangle me-2"></i> {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+        </form>
     </div>
+</div>
 </div>
 
 <style>
+    .btn-custom {
+        border-radius: 12px !important;
+        font-family: 'Oswald', sans-serif !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 1.5px !important;
+        text-transform: uppercase !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border: none !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-empresa {
+        background: #ffc107 !important;
+        color: #000 !important;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-empresa:hover {
+        background: #ffca2c !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+    }
+
+    .btn-custom::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: 0.5s;
+    }
+
+    .btn-custom:hover::after {
+        left: 100%;
+    }
+
     input[type="file"]::-webkit-file-upload-button {
         background: #2e3144;
         color: white;
@@ -134,23 +175,16 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const input = document.getElementById('imagem-input');
-        const preview = document.getElementById('image-preview');
-        const icon = document.getElementById('placeholder-icon');
-
-        if (input) {
-            input.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                        icon.style.display = 'none';
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
+        // Inicializa o Tom Select apenas para estética e busca
+        document.querySelectorAll('.tom-select').forEach((el) => {
+            new TomSelect(el, {
+                create: false, // Não permite criar categorias novas por aqui
+                allowEmptyOption: true,
+                placeholder: "SELECIONE...",
+                controlInput: null, // Remove a busca se você quiser um visual mais limpo
+                // Não colocamos onChange: submit aqui!
             });
-        }
+        });
     });
 </script>
 @endsection

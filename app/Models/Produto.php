@@ -68,4 +68,9 @@ class Produto extends Model
     {
         return $this->estoque_total <= $this->estoque_minimo;
     }
+    public function getValorTotalEstoqueAttribute()
+    {
+        // O total é a quantidade atual vezes o preço médio de custo
+        return $this->quantidade * $this->preco;
+    }
 }

@@ -4,64 +4,62 @@
 @section('content')
 <div class="container-fluid px-2">
 
-    <form action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end">
-        {{-- SEM @csrf AQUI PARA EVITAR ERROS DE SESSÃO NO GET --}}
-        <form id="filtroForm" action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end">
+    {{-- SEM @csrf AQUI PARA EVITAR ERROS DE SESSÃO NO GET --}}
+    <form id="filtroForm" action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end">
 
-            {{-- 1. Busca por Nome --}}
-            <div class="col-md-3">
-                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Buscar Material</label>
-                <div class="position-relative">
-                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
-                    <input type="text" name="search"
-                        class="form-control bg-dark border-secondary text-white ps-5 shadow-none"
-                        placeholder="Buscar por nome..."
-                        value="{{ request('search') }}"
-                        style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;">
-                </div>
-            </div>
-
-            {{-- 2. Filtro Categoria --}}
-            <div class="col-md-3">
-                <label class="nav-label">Filtrar Categoria</label>
-                <select name="categoria_id" class="tom-select" onchange="this.form.submit()">
-                    <option value="">TODAS AS CATEGORIAS</option>
-                    @foreach($categorias as $cat)
-                    <option value="{{ $cat->id }}" {{ request('categoria_id') == $cat->id ? 'selected' : '' }}>
-                        {{ strtoupper($cat->nome) }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- 3. Filtro Status --}}
-            <div class="col-md-2">
-                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Situação</label>
-                <select name="status" class="form-select bg-dark border-secondary text-white shadow-none"
-                    style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;"
-                    onchange="this.form.submit()">
-                    <option value="">TODOS</option>
-                    <option value="baixo" {{ request('status') == 'baixo' ? 'selected' : '' }}>ESTOQUE BAIXO</option>
-                    <option value="ok" {{ request('status') == 'ok' ? 'selected' : '' }}>EM DIA</option>
-                </select>
-            </div>
-
-            {{-- 4. Limite Alerta --}}
-            <div class="col-md-1">
-                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Alerta</label>
-                <input type="number" name="limite" class="form-control bg-dark border-secondary text-white shadow-none text-center"
-                    value="{{ request('limite', 5) }}"
+        {{-- 1. Busca por Nome --}}
+        <div class="col-md-3">
+            <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Buscar Material</label>
+            <div class="position-relative">
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                <input type="text" name="search"
+                    class="form-control bg-dark border-secondary text-white ps-5 shadow-none"
+                    placeholder="Buscar por nome..."
+                    value="{{ request('search') }}"
                     style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;">
             </div>
+        </div>
 
-            {{-- 5. Botão PDF (Ação via Link para não dar conflito de POST/GET) --}}
-            <div class="col-md-3 text-end">
-                <button type="button" onclick="gerarPdf()" class="btn btn-danger d-inline-flex align-items-center justify-content-center fw-bold w-100"
-                    style="border-radius: 10px; height: 48px; background: linear-gradient(45deg, #dc3545, #922b21); border: none;">
-                    <i class="fas fa-file-pdf me-2"></i> GERAR ORÇAMENTO PDF
-                </button>
-            </div>
-        </form>
+        {{-- 2. Filtro Categoria --}}
+        <div class="col-md-3">
+            <label class="nav-label">Filtrar Categoria</label>
+            <select name="categoria_id" class="tom-select"> {{-- Removido o onchange daqui --}}
+                <option value="">TODAS AS CATEGORIAS</option>
+                @foreach($categorias as $cat)
+                <option value="{{ $cat->id }}" {{ request('categoria_id') == $cat->id ? 'selected' : '' }}>
+                    {{ strtoupper($cat->nome) }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- 3. Filtro Status --}}
+
+        <div class="col-md-2">
+            <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Situação</label>
+            <select name="status" id="select-status" class="tom-select"> {{-- ID ADICIONADO AQUI --}}
+                <option value="">TODOS</option>
+                <option value="baixo" {{ request('status') == 'baixo' ? 'selected' : '' }}>ESTOQUE BAIXO</option>
+                <option value="ok" {{ request('status') == 'ok' ? 'selected' : '' }}>EM DIA</option>
+            </select>
+        </div>
+
+        {{-- 4. Limite Alerta --}}
+        <div class="col-md-1">
+            <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Alerta</label>
+            <input type="number" name="limite" class="form-control bg-dark border-secondary text-white shadow-none text-center"
+                value="{{ request('limite', 5) }}"
+                style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;">
+        </div>
+
+        {{-- 5. Botão PDF (Ação via Link para não dar conflito de POST/GET) --}}
+        <div class="col-md-3 text-end">
+            <button type="button" onclick="gerarPdf()" class="btn btn-danger d-inline-flex align-items-center justify-content-center fw-bold w-100"
+                style="border-radius: 10px; height: 48px; background: linear-gradient(45deg, #dc3545, #922b21); border: none;">
+                <i class="fas fa-file-pdf me-2"></i> GERAR ORÇAMENTO PDF
+            </button>
+        </div>
+    </form>
 </div>
 
 
@@ -197,50 +195,35 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializa todos os TomSelects primeiro
+            // 1. Inicializa todos os campos que usam a classe .tom-select
             document.querySelectorAll('.tom-select').forEach((el) => {
-                // Armazenamos a instância para uso futuro se necessário
-                el.tomselect = new TomSelect(el, {
-                    allowEmptyOption: true, // Garante que "TODAS AS CATEGORIAS" funcione
+                new TomSelect(el, {
+                    allowEmptyOption: true,
                     create: false,
                     controlInput: null,
-                    render: {
-                        option: function(data, escape) {
-                            return '<div class="option">' + escape(data.text.toUpperCase()) + '</div>';
-                        },
-                        item: function(data, escape) {
-                            return '<div class="item">' + escape(data.text.toUpperCase()) + '</div>';
-                        }
+                    onChange: function() {
+                        // Sempre que qualquer select mudar, envia o formulário
+                        document.getElementById('filtroForm').submit();
                     }
                 });
             });
 
-            const form = document.querySelector('form[action*="dashboard"]');
-
-            if (form) {
-                // Garante que o ENTER em qualquer campo apenas filtre a tela
-                form.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        // Evita o comportamento padrão do Enter (que às vezes tenta submeter arquivos)
-                        e.preventDefault();
-
-                        const exportInput = form.querySelector('input[name="export"]');
-                        if (exportInput) exportInput.remove();
-
-                        form.submit();
-                    }
+            // 2. Garante que o input de "Alerta" também envie o form ao mudar
+            const inputLimite = document.querySelector('input[name="limite"]');
+            if (inputLimite) {
+                inputLimite.addEventListener('change', function() {
+                    document.getElementById('filtroForm').submit();
                 });
             }
         });
 
+        // 3. Função do PDF (fora do DOMContentLoaded para ser global)
         function gerarPdf() {
-            // Captura os valores de forma segura, tratando caso o elemento não exista
             const search = document.querySelector('input[name="search"]')?.value || '';
             const categoria = document.querySelector('select[name="categoria_id"]')?.value || '';
             const status = document.querySelector('select[name="status"]')?.value || '';
             const limite = document.querySelector('input[name="limite"]')?.value || '';
 
-            // Constrói a URL para nova aba - Evita conflitos de CSRF e estados de formulário
             const params = new URLSearchParams({
                 search: search,
                 categoria_id: categoria,
