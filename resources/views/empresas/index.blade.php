@@ -271,23 +271,25 @@
 
 <div class="modal fade" id="editEmpresaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: #0d0d0d; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;">
+        <div class="modal-content" style="background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;">
             <div class="modal-body text-center p-5">
-                <h4 class="text-white mb-4 section-title">Editar Fornecedor</h4>
+                <h4 class="text-white mb-4 section-title text-warning"><i class="fas fa-edit me-2"></i> Editar Fornecedor</h4>
                 <form id="formEditEmpresa" method="POST">
                     @csrf @method('PUT')
                     <input type="hidden" id="edit_empresa_id">
                     <div class="mb-3 text-start">
-                        <label class="text-muted small text-uppercase fw-bold mb-2 ps-1">Nome da Empresa</label>
+                        <label class="text-muted small text-uppercase fw-bold mb-2 ps-1" style="font-size: 0.7rem; letter-spacing: 1px;">Nome da Empresa</label>
                         <input type="text" id="edit_empresa_nome" name="nome" class="form-control" required>
                     </div>
                     <div class="mb-4 text-start">
-                        <label class="text-muted small text-uppercase fw-bold mb-2 ps-1">CNPJ</label>
-                        <input type="text" id="edit_empresa_cnpj" name="cnpj" class="form-control">
+                        <label class="text-muted small text-uppercase fw-bold mb-2 ps-1" style="font-size: 0.7rem; letter-spacing: 1px;">CNPJ</label>
+                        <input type="text" id="edit_empresa_cnpj" name="cnpj" class="form-control" placeholder="CNPJ (Opcional)">
                     </div>
-                    <div class="d-flex gap-3">
-                        <button type="button" class="btn btn-outline-light w-100 py-3 fw-bold" data-bs-dismiss="modal">CANCELAR</button>
-                        <button type="submit" class="btn btn-yellow w-100 py-3">SALVAR</button>
+                    <div class="d-flex gap-3 mt-2">
+                        <button type="button" class="btn btn-custom btn-outline-light w-100 py-3" data-bs-dismiss="modal" style="border: 1px solid rgba(255,255,255,0.1) !important;">CANCELAR</button>
+                        <button type="submit" class="btn btn-custom btn-empresa w-100 py-3">
+                            <i class="fas fa-check-circle me-2"></i> SALVAR
+                        </button>
                     </div>
                 </form>
             </div>
@@ -297,19 +299,21 @@
 
 <div class="modal fade" id="editCategoriaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: #0d0d0d; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;">
+        <div class="modal-content" style="background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;">
             <div class="modal-body text-center p-5">
-                <h4 class="text-white mb-4 section-title text-info">Editar Categoria</h4>
+                <h4 class="text-white mb-4 section-title text-info"><i class="fas fa-tag me-2"></i> Editar Categoria</h4>
                 <form id="formEditCategoria" method="POST">
                     @csrf @method('PUT')
                     <input type="hidden" id="edit_categoria_id">
                     <div class="mb-4 text-start">
-                        <label class="text-muted small text-uppercase fw-bold mb-2 ps-1">Nome da Categoria</label>
+                        <label class="text-muted small text-uppercase fw-bold mb-2 ps-1" style="font-size: 0.7rem; letter-spacing: 1px;">Nome da Categoria</label>
                         <input type="text" id="edit_categoria_nome" name="nome" class="form-control" required>
                     </div>
-                    <div class="d-flex gap-3">
-                        <button type="button" class="btn btn-outline-light w-100 py-3 fw-bold" data-bs-dismiss="modal">CANCELAR</button>
-                        <button type="submit" class="btn btn-outline-cyan w-100 py-3">ATUALIZAR</button>
+                    <div class="d-flex gap-3 mt-2">
+                        <button type="button" class="btn btn-custom btn-outline-light w-100 py-3" data-bs-dismiss="modal" style="border: 1px solid rgba(255,255,255,0.1) !important;">CANCELAR</button>
+                        <button type="submit" class="btn btn-custom btn-categoria w-100 py-3">
+                            <i class="fas fa-sync-alt me-2"></i> ATUALIZAR
+                        </button>
                     </div>
                 </form>
             </div>

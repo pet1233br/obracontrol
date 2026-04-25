@@ -68,7 +68,7 @@
     {{-- Total de Itens - Azul Clarinho --}}
     <div class="col-md-4">
         <div class="p-4 d-flex flex-column justify-content-between"
-            style="background: linear-gradient(135deg, #2ba3f9 0%, #1a7bbd 100%); border-radius: 30px; min-height: 160px; box-shadow: 0 5px 10px rgba(43, 163, 249, 0.2);">
+            style="background: linear-gradient(135deg, #2ba3f9 0%, #1d6fd1 100%); border-radius: 30px; min-height: 160px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);">
             <div class="d-flex justify-content-between align-items-start">
                 <span class="text-white text-uppercase fw-bold" style="font-size: 0.8rem; letter-spacing: 1px; opacity: 0.9;">Total de Itens</span>
                 <i class="fas fa-boxes text-white opacity-50"></i>
@@ -215,9 +215,20 @@
                     document.getElementById('filtroForm').submit();
                 });
             }
+
+            // 3. Disparar busca ao pressionar Enter no campo de pesquisa
+            const inputSearch = document.querySelector('input[name="search"]');
+            if (inputSearch) {
+                inputSearch.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Evita comportamento padrão se necessário
+                        document.getElementById('filtroForm').submit();
+                    }
+                });
+            }
         });
 
-        // 3. Função do PDF (fora do DOMContentLoaded para ser global)
+        // 4. Função do PDF (fora do DOMContentLoaded para ser global)
         function gerarPdf() {
             const search = document.querySelector('input[name="search"]')?.value || '';
             const categoria = document.querySelector('select[name="categoria_id"]')?.value || '';

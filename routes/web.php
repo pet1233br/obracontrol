@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/movimentacoes', [MovimentacaoController::class, 'index'])->name('movimentacoes.index');
 
     // === CONFIGURAÇÕES DE ESTOQUE (Empresas e Categorias) ===
-    
+
     // Rota da API de CNPJ (Sempre antes do resource de empresas)
     Route::get('/empresas/verificar-cnpj', [EmpresaController::class, 'verificarCnpj'])->name('empresas.verificar.cnpj');
 

@@ -10,10 +10,11 @@ class Movimentacao extends Model
     protected $table = 'movimentacoes';
 
     protected $fillable = [
-    'produto_id', 
-    'user_id', 
-    'tipo', 
-    'quantidade', 
+    'produto_id',
+    'user_id',
+    'tipo',
+    'quantidade',
+    'valor_unitario',
     'observacao'
 ];
 
@@ -33,5 +34,26 @@ class Movimentacao extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Retorna log de auditoria formatado: "Usuário — ação"
+     */
+    public function getLogAttribute(): string
+    {
+        $usuario = $this->user->name ?? 'Sistema';
+
+        $observacao = $this->observacao;
+
+        // Detecta a ação baseada na observação
+        $acao = match (true) {
+            str_contains($observacao ?? '', 'Cadastro') => 'CADASTRO',
+            str_contains($observacao ?? '', 'Preço atualizado') => 'EDIÇÃO DE ESTOQUE/PREÇO',
+            str_contains($observacao ?? '', 'Ajuste via edição') => 'EDIÇÃO DE ESTOQUE',
+            str_contains($observacao ?? '', 'Baixa') => 'BAIXA MANUAL',
+            default => strtoupper($observacao ?? 'MOVIMENTAÇÃO'),
+        };
+
+        return "{$usuario} — {$acao}";
     }
 }

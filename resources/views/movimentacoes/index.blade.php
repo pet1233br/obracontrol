@@ -2,14 +2,20 @@
 @section('page_title', 'Histórico de Movimentações')
 
 @section('content')
+{{-- Adicionando Flatpickr via CDN --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
 <div class="container-fluid px-2">
 
     {{-- FILTROS DE AUDITORIA (Substituindo o cabeçalho antigo) --}}
     <div class="mb-3">
-        <form action="{{ route('movimentacoes.index') }}" method="GET" class="row g-3 align-items-end">
+        <form action="{{ route('movimentacoes.index') }}" method="GET" class="row g-3 align-items-end" id="formFiltros" autocomplete="off">
 
             {{-- Filtro por Categoria --}}
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label class="nav-label">Filtrar Categoria</label>
 
                 <select name="categoria_id" class="tom-select" onchange="this.form.submit()">
@@ -22,28 +28,34 @@
                 </select>
             </div>
 
-            {{-- Filtro por Data Inicial --}}
-            <div class="col-md-3">
-                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Desde:</label>
-                <input type="date" name="data_inicio" class="form-control bg-dark border-secondary text-white shadow-none"
-                    value="{{ request('data_inicio') }}"
-                    style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;">
+            {{-- Filtro por Período (Range) --}}
+            <div class="col-md-4">
+                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Filtrar Período:</label>
+                <div class="position-relative">
+                    <i class="fas fa-calendar-alt position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                    <input type="text" id="date_range" class="form-control bg-dark border-secondary text-white ps-5 shadow-none"
+                        placeholder="Selecione o intervalo de datas..."
+                        readonly
+                        style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;">
+                    
+                    {{-- Inputs ocultos para manter compatibilidade com o Controller --}}
+                    <input type="hidden" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}">
+                    <input type="hidden" name="data_fim" id="data_fim" value="{{ request('data_fim') }}">
+                </div>
             </div>
 
-            {{-- Filtro por Data Final --}}
-            <div class="col-md-3">
-                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Até:</label>
-                <input type="date" name="data_fim" class="form-control bg-dark border-secondary text-white shadow-none"
-                    value="{{ request('data_fim') }}"
-                    style="border-radius: 10px; height: 48px; border-color: rgba(255,255,255,0.1) !important;">
-            </div>
-
-            {{-- Botão Resetar (Ícone) --}}
-            <div class="col-md-2 text-end">
-                <a href="{{ route('movimentacoes.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center fw-bold w-100"
-                    style="border-radius: 10px; height: 48px; transition: 0.3s;">
-                    <i class="fas fa-undo me-2"></i> LIMPAR
-                </a>
+            {{-- Botões --}}
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning d-inline-flex align-items-center justify-content-center fw-bold"
+                        style="border-radius: 10px; height: 48px; transition: 0.3s; flex: 1;">
+                        <i class="fas fa-filter me-2"></i> FILTRAR
+                    </button>
+                    <a href="{{ route('movimentacoes.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center fw-bold"
+                        style="border-radius: 10px; height: 48px; transition: 0.3s; flex: 1;">
+                        <i class="fas fa-undo me-2"></i> LIMPAR
+                    </a>
+                </div>
             </div>
         </form>
     </div>
@@ -69,6 +81,10 @@
                             {{ $m->produto->nome ?? 'Excluído' }}
                         </div>
                         <small class="text-secondary">{{ $m->produto->categoria->nome ?? 'Geral' }}</small>
+                        <br>
+                        <small style="color: #0dcaf0; font-size: 0.75rem;">
+                            <strong>Custo unitário:</strong> R$ {{ number_format($m->valor_unitario ?? 0, 2, ',', '.') }}
+                        </small>
                     </div>
 
                     {{-- TIPO (ENTRADA/SAÍDA) - LARGURA MENOR E FIXA --}}
@@ -100,11 +116,11 @@
                         </div>
                     </div>
 
-                    {{-- OBSERVAÇÃO - LARGURA FLEXÍVEL --}}
+                    {{-- LOG DE AUDITORIA - LARGURA FLEXÍVEL --}}
                     <div class="flex-grow-1 ps-3" style="width: 15%;">
-                        <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">Observação</div>
-                        <div class="text-secondary small italic" style="font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $m->observacao }}">
-                            "{{ $m->observacao ?: 'Sem observações.' }}"
+                        <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">Log / Autor</div>
+                        <div class="text-secondary small" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $m->log }}">
+                            {{ $m->log }}
                         </div>
                     </div>
 
@@ -194,21 +210,38 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Inicializa o TomSelect para o filtro de Categoria
+        // 1. Inicializa o TomSelect
         document.querySelectorAll('.tom-select').forEach((el) => {
             new TomSelect(el, {
-                allowEmptyOption: true, // Importante para o "TODAS AS CATEGORIAS"
+                allowEmptyOption: true,
                 create: false,
-                controlInput: null,
-                render: {
-                    option: function(data, escape) {
-                        return '<div class="option">' + escape(data.text.toUpperCase()) + '</div>';
-                    },
-                    item: function(data, escape) {
-                        return '<div class="item">' + escape(data.text.toUpperCase()) + '</div>';
-                    }
-                }
+                controlInput: null
             });
+        });
+
+        // 2. Configura o Flatpickr para Intervalo de Datas
+        const dataInicio = document.getElementById('data_inicio').value;
+        const dataFim = document.getElementById('data_fim').value;
+
+        flatpickr("#date_range", {
+            mode: "range",
+            dateFormat: "d/m/Y",
+            locale: "pt",
+            theme: "dark",
+            defaultDate: (dataInicio && dataFim) ? [dataInicio, dataFim] : null,
+            onClose: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length === 2) {
+                    // Formata para o padrão Y-m-d esperado pelo banco/Laravel
+                    const start = instance.formatDate(selectedDates[0], "Y-m-d");
+                    const end = instance.formatDate(selectedDates[1], "Y-m-d");
+                    
+                    document.getElementById('data_inicio').value = start;
+                    document.getElementById('data_fim').value = end;
+                } else if (selectedDates.length === 0) {
+                    document.getElementById('data_inicio').value = '';
+                    document.getElementById('data_fim').value = '';
+                }
+            }
         });
     });
 </script>

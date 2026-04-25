@@ -118,13 +118,98 @@
 
         }
 
-        /* ==================== FORM FIXES ==================== */
-        .form-control.bg-dark,
-        .form-select.bg-dark {
-            background-color: #24242448 !important;
+        /* ==================== FORM FIXES (PADRONIZAÇÃO GLOBAL) ==================== */
+        .form-control, 
+        .form-select,
+        .form-input-dark,
+        .ts-control {
+            background-color: rgba(36, 36, 36, 0.3) !important;
             color: #ffffff !important;
-            border: none !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; /* BORDA PADRÃO PARA TODOS */
+            border-radius: 12px !important;
+            height: 48px !important;
+            padding: 0 15px !important;
+            font-size: 0.95rem !important;
             box-shadow: none !important;
+            outline: none !important;
+            transition: all 0.3s ease !important;
+        }
+
+        /* Efeito de Foco Unificado */
+        .form-control:focus, 
+        .form-select:focus,
+        .form-input-dark:focus,
+        .ts-wrapper.focus .ts-control {
+            border-color: rgba(255, 193, 7, 0.5) !important;
+            background-color: rgba(36, 36, 36, 0.5) !important;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15) !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* Melhorar aparência do select nativo (quando não usar TomSelect) */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba(255,255,255,0.5)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+            background-position: right 1rem center !important;
+            background-size: 16px 12px !important;
+        }
+
+        /* ==================== TOM SELECT ADJUSTMENTS ==================== */
+        .ts-wrapper.single .ts-control {
+            display: flex !important;
+            align-items: center !important;
+            padding-right: 40px !important;
+        }
+
+        .ts-wrapper.single .ts-control .item {
+            color: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .ts-wrapper.single .ts-control::after {
+            content: "\f107" !important;
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+            display: block !important;
+            border: none !important;
+            position: absolute !important;
+            right: 15px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            color: rgba(255, 255, 255, 0.4) !important;
+            transition: transform 0.3s ease !important;
+        }
+
+        .ts-wrapper.single.dropdown-active .ts-control::after {
+            transform: translateY(-50%) rotate(180deg) !important;
+            color: var(--yellow) !important;
+        }
+
+        .ts-dropdown {
+            background: #0f1329 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
+            margin-top: 8px !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
+            overflow: hidden !important;
+        }
+
+        .ts-dropdown .option {
+            padding: 12px 15px !important;
+            color: #ddd !important;
+        }
+
+        .ts-dropdown .active {
+            background-color: var(--yellow) !important;
+            color: #000 !important;
+            font-weight: 600 !important;
+        }
+
+        .ts-control input {
+            color: #fff !important;
         }
 
         .icon-seta-detalhe {
@@ -136,101 +221,6 @@
             transform: rotate(180deg);
             opacity: 1;
             color: #ffc107;
-        }
-
-        /* Melhorar aparência do select escuro */
-        /* Fix Definitivo para Categoria Dark */
-        .form-select.tom-select,
-        select.tom-select {
-            /* Cor de fundo: o seu "Marine Blue" transparente */
-            background-color: #24242448 !important;
-
-            /* Borda e Arredondamento */
-            border: none !important;
-            border-radius: 10px !important;
-
-            /* Texto em Branco */
-            color: #ffffff !important;
-
-            /* Alinhamento e Altura */
-            height: 50px !important;
-            display: flex !important;
-            align-items: center !important;
-            padding-left: 15px !important;
-
-            /* Seta Branca (FontAwesome) */
-            background-image: none !important;
-            /* Mata a seta preta nativa */
-            position: relative;
-        }
-
-        /* Criando a Seta Branca Elegante */
-        .form-select.tom-select::after,
-        select.tom-select::after {
-            content: "\f107" !important;
-            font-family: "Font Awesome 6 Free" !important;
-            font-weight: 900 !important;
-            position: absolute !important;
-            right: 15px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            color: rgba(255, 255, 255, 0.4) !important;
-        }
-
-        .ts-wrapper.single .ts-control {
-            background-color: #24242448 !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 12px !important;
-            padding: 12px 45px 12px 16px !important;
-            min-height: 50px !important;
-            color: #fff !important;
-            font-size: 0.95rem;
-        }
-
-        .ts-wrapper.single.focus .ts-control {
-            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.4) !important;
-            border-color: rgba(255, 193, 7, 0.3) !important;
-        }
-
-        /* Seta customizada */
-        .ts-wrapper.single .ts-control::after {
-            content: "\f107";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
-        }
-
-        .ts-wrapper.single.dropdown-active .ts-control::after {
-            transform: translateY(-50%) rotate(180deg);
-            color: #ffc107;
-        }
-
-        /* Dropdown - estilo da segunda imagem */
-        .ts-dropdown {
-            background-color: #0f1329 !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 12px !important;
-            margin-top: 8px !important;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
-            padding: 8px 0 !important;
-        }
-
-        .ts-dropdown .option {
-            padding: 13px 18px !important;
-            color: #ddd !important;
-            font-size: 0.95rem;
-        }
-
-        .ts-dropdown .option:hover,
-        .ts-dropdown .active {
-            background-color: #ffc107 !important;
-            color: #000000 !important;
-            font-weight: 700 !important;
         }
 
 

@@ -149,11 +149,13 @@
 
             {{-- Busca por Nome --}}
             <div class="col-md-6">
-                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Buscar </label>
+                <label class="form-label text-secondary text-uppercase fw-bold mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Buscar Material</label>
                 <div class="position-relative">
-                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
-                    <input type="text" name="busca" class="form-control bg-dark border-secondary text-white ps-5 shadow-none"
-                        placeholder="Procurar material..." value="{{ request('busca') }}" style="border-radius: 10px; height: 48px; background:rgba (0 , 0, 0, 0);">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="pointer-events: none;"></i>
+                    <input type="text" name="busca"
+                        class="form-control form-input-dark"
+                        style="padding-left: 42px !important;"
+                        placeholder="Procurar material..." value="{{ request('busca') }}">
                 </div>
             </div>
 

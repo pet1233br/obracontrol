@@ -130,11 +130,12 @@ class ProdutoController extends Controller
 
         // 6. REGISTRO NO HISTÓRICO
         \App\Models\Movimentacao::create([
-            'produto_id' => $produto->id,
-            'user_id'    => auth()->id() ?? 1,
-            'tipo'       => 'entrada',
-            'quantidade' => $request->quantidade,
-            'observacao' => 'Cadastro inicial (preço pendente de edição)',
+            'produto_id'     => $produto->id,
+            'user_id'        => auth()->id() ?? 1,
+            'tipo'           => 'entrada',
+            'quantidade'     => $request->quantidade,
+            'valor_unitario' => 0,
+            'observacao'     => 'Cadastro inicial: ' . $produto->nome,
         ]);
 
         return redirect()->route('produtos.index')->with('success', 'Produto cadastrado! Agora você pode editar o preço na listagem.');
@@ -191,7 +192,7 @@ class ProdutoController extends Controller
 
         // 5. SE CLICAR NO BOTÃO GERAR PDF (Ação do Orçamento)
         if ($request->get('export') == 'pdf') {
-            $produtosParaPdf = (clone $queryBase)->get();
+            $produtosParaPdf = (clone $queryBase)->with(['categoria', 'empresas'])->get();
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.orcamento', ['produtos' => $produtosParaPdf]);
             return $pdf->download('orcamento_gerado.pdf');
         }
@@ -288,6 +289,11 @@ class ProdutoController extends Controller
         $produto->update($dados);
 
         // 2. ATUALIZAÇÃO DE ESTOQUE (PIVOT)
+        $precoAntes = [];
+        foreach ($produto->empresas()->get() as $emp) {
+            $precoAntes[$emp->id] = $emp->pivot->preco_custo;
+        }
+
         if ($request->has('empresas') && is_array($request->empresas)) {
             $quantidades = $request->input('quantidades', []);
             $precosUnitarios = $request->input('precos_unitarios', []);
@@ -301,7 +307,6 @@ class ProdutoController extends Controller
                     $precoLinha = str_replace('.', '', $precosUnitarios[$index] ?? '0');
                     $precoLinha = (float) str_replace(',', '.', $precoLinha);
 
-                    // IMPORTANTE: Use 'preco_custo' se foi esse o nome na migration!
                     $dadosPivot[$empresaId] = [
                         'quantidade' => (int) ($quantidades[$index] ?? 0),
                         'preco_custo' => $precoLinha
@@ -311,15 +316,39 @@ class ProdutoController extends Controller
 
             $produto->empresas()->sync($dadosPivot);
 
-            // 3. HISTÓRICO
+            // 3. HISTÓRICO — DIFERENÇA DE QUANTIDADE
             $diferenca = $quantidadeNovaReal - $quantidadeAntiga;
-            if ($diferenca != 0) {
+
+            // Detectar mudanças de preço
+            $alteracoesPreco = [];
+            $valoresAlterados = [];
+            foreach ($dadosPivot as $empresaId => $dados) {
+                $antigo = $precoAntes[$empresaId] ?? 0;
+                $novo = $dados['preco_custo'];
+                if (abs($antigo - $novo) > 0.01) {
+                    $empresaNome = \App\Models\Empresa::find($empresaId)?->nome ?? "Empresa #$empresaId";
+                    $alteracoesPreco[] = "{$empresaNome}: R$ {$antigo} → R$ {$novo}";
+                    $valoresAlterados[] = $novo;
+                }
+            }
+
+            // Se houve diferença de quantidade OU alteração de preço, registrar movimentação
+            if ($diferenca != 0 || !empty($alteracoesPreco)) {
+                $partes = [];
+                if ($diferenca != 0) {
+                    $partes[] = ($diferenca > 0 ? 'Entrada' : 'Saída') . ' de ' . abs($diferenca) . ' un.';
+                }
+                if (!empty($alteracoesPreco)) {
+                    $partes[] = 'Preço atualizado: ' . implode('; ', $alteracoesPreco);
+                }
+
                 \App\Models\Movimentacao::create([
-                    'produto_id' => $produto->id,
-                    'user_id'    => auth()->id() ?? 1,
-                    'tipo'       => $diferenca > 0 ? 'entrada' : 'saida',
-                    'quantidade' => abs($diferenca),
-                    'observacao' => 'Ajuste via edição: ' . ($diferenca > 0 ? 'Entrada' : 'Saída') . ' de ' . abs($diferenca) . ' un.',
+                    'produto_id'     => $produto->id,
+                    'user_id'        => auth()->id() ?? 1,
+                    'tipo'           => $diferenca > 0 ? 'entrada' : 'saida',
+                    'quantidade'     => $diferenca != 0 ? abs($diferenca) : 0,
+                    'valor_unitario' => end($valoresAlterados) ?: ($produto->preco_media ?? 0),
+                    'observacao'     => 'Ajuste via edição: ' . implode(' | ', $partes),
                 ]);
             }
 
@@ -355,13 +384,15 @@ class ProdutoController extends Controller
             ]);
         }
 
-        // 3. REGISTRA A SAÍDA NO HISTÓRICO (Corrigido para 'saida')
+        // 3. REGISTRA A SAÍDA NO HISTÓRICO
+        $obsBaixa = $request->observacao ?? "Baixa manual de {$qtdRetirada} un. de {$produto->nome}";
         Movimentacao::create([
-            'produto_id' => $produto->id,
-            'user_id'    => auth()->id() ?? 1,
-            'tipo'       => 'saida', // Antes estava 'entrada'
-            'quantidade' => $qtdRetirada,
-            'observacao' => $request->observacao ?? 'Baixa de estoque manual',
+            'produto_id'     => $produto->id,
+            'user_id'        => auth()->id() ?? 1,
+            'tipo'           => 'saida',
+            'quantidade'     => $qtdRetirada,
+            'valor_unitario' => $produto->preco_media ?? 0,
+            'observacao'     => $obsBaixa,
         ]);
 
         return redirect()->back()->with('success', 'Baixa realizada com sucesso!');
